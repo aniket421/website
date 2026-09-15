@@ -6,6 +6,7 @@ import { CategoryRail } from '@/components/sections/CategoryRail';
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs';
 import { Testimonials } from '@/components/sections/Testimonials';
 import { Faq } from '@/components/sections/Faq';
+import { Contact } from '@/components/sections/Contact';
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
       <WhyChooseUs />
       <Testimonials />
       <Faq />
+      <Contact />
     </>
   );
 }
