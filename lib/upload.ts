@@ -4,9 +4,18 @@ import { validateUpload } from '@/lib/validations/enquiry';
  * Uploads a reference file straight from the browser to Cloudinary using a
  * signature from /api/upload/sign. Bytes never touch our server.
  */
-export async function uploadReference(file: File): Promise<{ url: string } | { error: string }> {
-  const localError = validateUpload(file);
-  if (localError) return { error: localError };
+export type UploadPurpose = 'enquiry' | 'product' | 'gallery' | 'brand' | 'category';
+
+export async function uploadToCloudinary(
+  file: File,
+  purpose: UploadPurpose = 'enquiry',
+): Promise<{ url: string } | { error: string }> {
+  // Enquiry attachments have a documented allow-list; admin images are checked
+  // by Cloudinary against the formats baked into the signature.
+  if (purpose === 'enquiry') {
+    const localError = validateUpload(file);
+    if (localError) return { error: localError };
+  }
 
   let signature: {
     signature: string;
@@ -17,7 +26,11 @@ export async function uploadReference(file: File): Promise<{ url: string } | { e
   };
 
   try {
-    const response = await fetch('/api/upload/sign', { method: 'POST' });
+    const response = await fetch('/api/upload/sign', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ purpose }),
+    });
     const body = await response.json();
     if (!response.ok) {
       return { error: body?.error?.message ?? 'We could not prepare the upload.' };
@@ -46,3 +59,6 @@ export async function uploadReference(file: File): Promise<{ url: string } | { e
     return { error: 'The upload was interrupted. Please try again.' };
   }
 }
+
+/** Backwards-compatible alias for the public enquiry form. */
+export const uploadReference = (file: File) => uploadToCloudinary(file, 'enquiry');
