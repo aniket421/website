@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingSupport } from '@/components/layout/FloatingSupport';
 import { site } from '@/lib/data/site';
+import { getCategories } from '@/lib/queries/catalogue';
 import './globals.css';
 
 const manrope = Manrope({
@@ -29,7 +30,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const categories = await getCategories();
+
   return (
     <html lang="en-IN" className={manrope.variable}>
       <body>
@@ -39,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
-        <Header />
+        <Header categories={categories} />
         <main id="main">{children}</main>
         <Footer />
         <FloatingSupport />

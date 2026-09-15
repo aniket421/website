@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { ChevronDown, Menu, Phone, X } from 'lucide-react';
-import { categories } from '@/lib/data/categories';
 import { navLinks } from '@/lib/data/nav';
 import { site, telUrl } from '@/lib/data/site';
 import { Container } from '@/components/ui/Container';
@@ -11,7 +10,9 @@ import { cn } from '@/lib/utils';
 
 const SCROLL_THRESHOLD = 60;
 
-export function Header() {
+export type NavCategory = { id: string; name: string; slug: string };
+
+export function Header({ categories }: { categories: NavCategory[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
@@ -122,7 +123,7 @@ export function Header() {
                                 onClick={closeAll}
                                 className="block rounded-sm px-3 py-2.5 text-[0.9375rem] text-body transition-colors hover:bg-brass-tint hover:text-ink"
                               >
-                                {category.title}
+                                {category.name}
                               </Link>
                             </li>
                           ))}
@@ -223,7 +224,7 @@ export function Header() {
                     onClick={closeAll}
                     className="block text-[0.9375rem] text-body"
                   >
-                    {category.title}
+                    {category.name}
                   </Link>
                 </li>
               ))}

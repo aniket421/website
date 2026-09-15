@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { brands } from '@/lib/data/brands';
+import { getBrands } from '@/lib/queries/catalogue';
 import { Container } from '@/components/ui/Container';
 
 /**
@@ -7,7 +7,10 @@ import { Container } from '@/components/ui/Container';
  * loop is seamless. The second pass is hidden from assistive tech. Hovering
  * anywhere on the track pauses it — pure CSS, so this stays a Server Component.
  */
-export function BrandMarquee() {
+export async function BrandMarquee() {
+  const brands = await getBrands();
+  if (brands.length === 0) return null;
+
   return (
     <section id="brands" className="bg-surface py-14 lg:py-20">
       <Container>
@@ -19,13 +22,13 @@ export function BrandMarquee() {
       <div className="group marquee-mask mt-9 overflow-hidden">
         <ul className="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused]">
           {brands.map((brand) => (
-            <BrandItem key={brand.slug} name={brand.name} logo={brand.logo} />
+            <BrandItem key={brand.slug} name={brand.name} logo={brand.logoUrl} />
           ))}
           {brands.map((brand) => (
             <BrandItem
               key={`${brand.slug}-duplicate`}
               name={brand.name}
-              logo={brand.logo}
+              logo={brand.logoUrl}
               aria-hidden
             />
           ))}

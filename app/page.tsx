@@ -10,6 +10,9 @@ import { Testimonials } from '@/components/sections/Testimonials';
 import { Faq } from '@/components/sections/Faq';
 import { Contact } from '@/components/sections/Contact';
 
+/** Showroom edits appear within five minutes without a redeploy. */
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   /*
    * Spelled out in full: a title.template on the root layout applies to child
