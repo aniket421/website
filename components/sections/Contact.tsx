@@ -73,7 +73,7 @@ export function Contact() {
                 title={`Map showing ${site.name} at ${fullAddress}`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="block h-[280px] w-full border-0 lg:h-[320px]"
+                className="block h-[280px] w-full border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 lg:h-[320px]"
               />
               <a
                 href={mapLinkUrl}

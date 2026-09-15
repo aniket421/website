@@ -21,7 +21,7 @@ export function SectionHeading({
 
   return (
     <div className={cn(centered && 'text-center', className)}>
-      <p className="text-eyebrow uppercase text-brass">{eyebrow}</p>
+      <p className="text-eyebrow uppercase text-brass-deep">{eyebrow}</p>
       <Heading id={id} className="mt-3 text-heading">
         {title}
       </Heading>

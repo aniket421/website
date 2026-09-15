@@ -11,7 +11,7 @@ export function BrandMarquee() {
   return (
     <section id="brands" className="bg-surface py-14 lg:py-20">
       <Container>
-        <p className="text-center text-eyebrow uppercase text-brass">
+        <p className="text-center text-eyebrow uppercase text-brass-deep">
           Trusted partner brands
         </p>
       </Container>

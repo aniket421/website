@@ -239,7 +239,7 @@ export function EnquiryForm() {
 
 const controlClasses =
   'mt-2 block w-full rounded-sm border border-line bg-surface px-4 py-3 text-[0.9375rem] text-ink ' +
-  'placeholder:text-body/70 transition-colors duration-200 hover:border-brass';
+  'placeholder:text-body transition-colors duration-200 hover:border-brass';
 
 /**
  * Renders the label, the control and its message. Errors sit under the field

@@ -70,8 +70,13 @@ export function Header() {
           >
             <span className="block text-[1.5rem] font-extrabold tracking-[-0.03em]">
               {site.wordmark.primary}
-            </span>
-            <span className="mt-0.5 block text-[0.6rem] font-bold uppercase tracking-[0.34em] text-brass">
+            </span>{' '}
+            <span
+              className={cn(
+                'mt-0.5 block text-[0.6rem] font-bold uppercase tracking-[0.34em]',
+                solid ? 'text-brass-deep' : 'text-brass',
+              )}
+            >
               {site.wordmark.secondary}
             </span>
           </Link>
@@ -157,7 +162,12 @@ export function Header() {
             <Link
               href="#contact"
               onClick={closeAll}
-              className="hidden h-11 items-center rounded-full bg-ink-soft px-5 text-[0.9375rem] font-semibold text-surface transition-colors duration-200 hover:bg-ink nav:inline-flex"
+              className={cn(
+                'hidden h-11 items-center rounded-full bg-ink-soft px-5 text-[0.9375rem] font-semibold text-surface',
+                'transition-colors duration-200 hover:bg-ink nav:inline-flex',
+                // A dark pill on a dark photograph needs an edge to read at all.
+                solid ? 'border border-transparent' : 'border border-surface/25',
+              )}
             >
               Get In Touch
             </Link>
@@ -204,7 +214,7 @@ export function Header() {
               ))}
             </ul>
 
-            <p className="mt-6 text-eyebrow uppercase text-brass">Collections</p>
+            <p className="mt-6 text-eyebrow uppercase text-brass-deep">Collections</p>
             <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5">
               {categories.map((category) => (
                 <li key={category.slug}>

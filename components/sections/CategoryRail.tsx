@@ -18,6 +18,7 @@ export function CategoryRail() {
     if (!rail) return;
     const max = rail.scrollWidth - rail.clientWidth;
     setAtStart(rail.scrollLeft <= 1);
+
     // A sub-pixel gap at the end is common once the rail is scaled.
     setAtEnd(rail.scrollLeft >= max - 1);
   }, []);
@@ -47,7 +48,7 @@ export function CategoryRail() {
       <Container>
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-eyebrow uppercase text-brass">Our Collections</p>
+            <p className="text-eyebrow uppercase text-brass-deep">Our Collections</p>
             <h2 id="products-heading" className="mt-3 text-heading">
               Explore Product Categories
             </h2>
@@ -75,10 +76,12 @@ export function CategoryRail() {
       <Container className="mt-11">
         <ul
           ref={railRef}
+          // Focusable so the rail can be scrolled with the arrow keys; it keeps
+          // native list semantics rather than nesting a second region landmark
+          // inside the section's own.
           tabIndex={0}
-          role="region"
-          aria-label="Product categories"
-          className="no-scrollbar -mx-gutter flex snap-x snap-mandatory gap-6 overflow-x-auto px-gutter pb-2 lg:-mx-gutter-lg lg:px-gutter-lg"
+          aria-label="Product categories, scroll or use the arrow keys"
+          className="no-scrollbar -mx-gutter flex snap-x snap-mandatory scroll-pl-gutter gap-6 overflow-x-auto px-gutter pb-2 lg:-mx-gutter-lg lg:scroll-pl-gutter-lg lg:px-gutter-lg"
         >
           {categories.map((category) => (
             <li
@@ -92,9 +95,14 @@ export function CategoryRail() {
                 sizes="(max-width: 640px) 248px, 276px"
                 imageClassName="transition-transform duration-500 ease-subtle group-hover:scale-105"
               />
+              {/*
+                The scrim holds at 0.75 or darker across the whole band the
+                text sits in, so the white title and description clear AA even
+                if the supplied photograph is very light.
+              */}
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(to_top,rgba(26,26,26,0.82)_0%,rgba(26,26,26,0.35)_42%,rgba(26,26,26,0)_70%)]"
+                className="absolute inset-0 bg-[linear-gradient(to_top,rgba(26,26,26,0.92)_0%,rgba(26,26,26,0.75)_38%,rgba(26,26,26,0.25)_62%,rgba(26,26,26,0)_82%)]"
               />
               <div className="absolute inset-x-0 bottom-0 p-6">
                 <h3 className="text-card text-surface">{category.title}</h3>
@@ -130,7 +138,7 @@ function RailButton({
       className={cn(
         'inline-flex h-12 w-12 items-center justify-center rounded-full border transition-colors duration-200',
         disabled
-          ? 'cursor-not-allowed border-line text-line'
+          ? 'cursor-not-allowed border-line text-body/35'
           : 'border-line text-ink hover:border-brass hover:bg-brass-tint',
       )}
     >

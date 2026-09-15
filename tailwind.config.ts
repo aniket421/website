@@ -21,6 +21,15 @@ const config: Config = {
           DEFAULT: '#C8A45D', // primary accent — CTAs, icons, eyebrows, active states
           soft: '#E4D3AE', // decorative marks, quote glyphs
           tint: '#FAF6EE', // hover fills on light surfaces
+          /*
+           * Small brass text on a light surface measures 2.35:1 against
+           * surface and 2.16:1 against surface-alt — well under the AA floor
+           * the quality bar requires. This darker brass carries eyebrows and
+           * any other small brass text on light grounds (5.30:1 and 4.86:1).
+           * #C8A45D is unchanged everywhere it passes: fills, icons, active
+           * states, and eyebrows on the footer.
+           */
+          deep: '#8A6520',
         },
         ink: {
           DEFAULT: '#1A1A1A', // headings

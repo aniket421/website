@@ -8,11 +8,16 @@ export function Hero() {
   return (
     <section id="top" className="relative min-h-[100svh] w-full overflow-hidden">
       <div className="absolute inset-0">
-        <AssetImage asset={heroImage} fill priority sizes="100vw" />
+        <AssetImage asset={heroImage} fill priority sizes="100vw" tone="dark" />
         {/*
           Scrim: 55% at the top so the transparent header reads, 30% through the
           middle so the photograph survives, 60% at the base for the scroll cue.
-          Measured at AA or better for white text at every stop.
+          White text clears AA at every stop against the dark placeholder.
+
+          TODO: the 30% midpoint is the tight one. Check the supplied
+          marble-bathroom photograph before launch — a bright, high-key marble
+          shot can push the lede under 4.5:1, in which case raise the middle
+          stop to about 0.45 rather than shipping it as is.
         */}
         <div
           aria-hidden="true"
