@@ -1,5 +1,6 @@
 import { Clock, MapPin, Phone } from 'lucide-react';
 import { EnquiryForm } from '@/components/forms/EnquiryForm';
+import { getEnquiryOptions } from '@/lib/queries/reference';
 import { Container } from '@/components/ui/Container';
 import { Section } from '@/components/ui/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
@@ -12,7 +13,10 @@ import {
   whatsappUrl,
 } from '@/lib/data/site';
 
-export function Contact() {
+export async function Contact() {
+  // Server Component: the options are in the first paint, not a client fetch.
+  const { brands, categories } = await getEnquiryOptions();
+
   return (
     <Section id="contact" tone="alt" aria-labelledby="contact-heading">
       <Container>
@@ -86,7 +90,7 @@ export function Contact() {
             </div>
           </div>
 
-          <EnquiryForm />
+          <EnquiryForm brands={brands} categories={categories} />
         </div>
       </Container>
     </Section>

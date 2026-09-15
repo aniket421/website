@@ -3,20 +3,26 @@
 import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckCircle2, Send } from 'lucide-react';
-import { brandNames } from '@/lib/data/brands';
-import { categoryNames } from '@/lib/data/categories';
 import { site, whatsappUrl } from '@/lib/data/site';
+import type { Option } from '@/lib/queries/reference';
+import { uploadReference } from '@/lib/upload';
 import {
   ACCEPTED_UPLOAD_EXTENSIONS,
   emptyEnquiry,
   enquirySchema,
   validateUpload,
   type EnquiryValues,
-} from '@/lib/validation/enquiry';
-import { zodResolver } from '@/lib/validation/zodResolver';
+} from '@/lib/validations/enquiry';
+import { zodResolver } from '@/lib/validations/zodResolver';
 import { cn } from '@/lib/utils';
 
-export function EnquiryForm() {
+export function EnquiryForm({
+  brands,
+  categories,
+}: {
+  brands: Option[];
+  categories: Option[];
+}) {
   const ids = useId();
   const [sent, setSent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -26,6 +32,7 @@ export function EnquiryForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<EnquiryValues>({
     resolver: zodResolver(enquirySchema),
@@ -35,23 +42,49 @@ export function EnquiryForm() {
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
+    setFileError(null);
 
+    // The file goes straight to Cloudinary; only the resulting URL is posted.
+    let attachmentUrl = '';
     if (file) {
-      const uploadError = validateUpload(file);
-      if (uploadError) {
-        setFileError(uploadError);
+      const uploaded = await uploadReference(file);
+      if ('error' in uploaded) {
+        setFileError(uploaded.error);
         return;
       }
+      attachmentUrl = uploaded.url;
     }
 
-    const payload = new FormData();
-    for (const [key, value] of Object.entries(values)) payload.append(key, value);
-    if (file) payload.append('reference', file);
-
     try {
-      const response = await fetch('/api/enquiry', { method: 'POST', body: payload });
-      if (!response.ok) throw new Error('Request failed');
-      setSent(true);
+      const response = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...values, attachmentUrl }),
+      });
+
+      const body = await response.json().catch(() => null);
+
+      if (response.ok) {
+        setSent(true);
+        return;
+      }
+
+      // 422 carries per-field messages; surface them where the user is looking.
+      const fields = body?.error?.fields as Record<string, string> | undefined;
+      if (response.status === 422 && fields) {
+        for (const [name, message] of Object.entries(fields)) {
+          if (name in emptyEnquiry) {
+            setError(name as keyof EnquiryValues, { type: 'server', message });
+          }
+        }
+        setFormError(null);
+        return;
+      }
+
+      setFormError(
+        body?.error?.message ??
+          `We could not send that just now. Please call ${site.phone.display} and we will take the details over the phone.`,
+      );
     } catch {
       setFormError(
         `We could not send that just now. Please call ${site.phone.display} and we will take the details over the phone.`,
@@ -89,7 +122,7 @@ export function EnquiryForm() {
     <form
       noValidate
       onSubmit={onSubmit}
-      className="rounded-panel border border-line bg-surface p-7 shadow-panel lg:p-9"
+      className="relative rounded-panel border border-line bg-surface p-7 shadow-panel lg:p-9"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
@@ -146,26 +179,26 @@ export function EnquiryForm() {
           )}
         </Field>
 
-        <Field id={`${ids}-brand`} label="Brand" error={errors.brand?.message}>
+        <Field id={`${ids}-brand`} label="Brand" error={errors.brandId?.message}>
           {(props) => (
-            <select {...props} {...register('brand')}>
+            <select {...props} {...register('brandId')}>
               <option value="">No preference</option>
-              {brandNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
                 </option>
               ))}
             </select>
           )}
         </Field>
 
-        <Field id={`${ids}-category`} label="Product Category" error={errors.category?.message}>
+        <Field id={`${ids}-category`} label="Product Category" error={errors.categoryId?.message}>
           {(props) => (
-            <select {...props} {...register('category')}>
+            <select {...props} {...register('categoryId')}>
               <option value="">Not sure yet</option>
-              {categoryNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
                 </option>
               ))}
             </select>
@@ -215,6 +248,22 @@ export function EnquiryForm() {
             A photo of the space or a plan helps. JPG, PNG or PDF, up to 8MB.
           </p>
         )}
+      </div>
+
+      {/*
+        Honeypot. Positioned off-screen rather than display:none, since some
+        bots skip fields they can tell are hidden. Out of the tab order and out
+        of the accessibility tree, so nobody using the site ever meets it.
+      */}
+      <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
+        <label htmlFor={`${ids}-company-website`}>Company website</label>
+        <input
+          id={`${ids}-company-website`}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          {...register('companyWebsite')}
+        />
       </div>
 
       {formError ? (

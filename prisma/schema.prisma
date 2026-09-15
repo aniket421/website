@@ -1,0 +1,213 @@
+// Elegance Bath Decor — single showroom, one or two admins.
+// No tenancy, no customer accounts, no cart, no payments. See BACKEND.md §1.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Application {
+  FLOOR
+  WALL
+  BOTH
+  OUTDOOR
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  CLOSED
+  SPAM
+}
+
+/// Offline enquiries get logged here too, so the pipeline is one list.
+enum EnquirySource {
+  WEBSITE_FORM
+  WHATSAPP
+  PHONE
+  WALK_IN
+}
+
+enum AdminRole {
+  OWNER
+  STAFF
+}
+
+model Brand {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  logoUrl      String?
+  description  String?
+  websiteUrl   String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products  Product[]
+  enquiries Enquiry[]
+
+  @@index([isActive, displayOrder])
+}
+
+model Category {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  imageUrl     String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products      Product[]
+  enquiries     Enquiry[]
+  galleryImages GalleryImage[]
+
+  @@index([isActive, displayOrder])
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  brandId     String
+  categoryId  String
+  description String?
+  /// Free text, e.g. "800×1600 mm" — sizes are not a fixed vocabulary.
+  size        String?
+  /// e.g. "Matte", "Glossy", "Carving".
+  finish      String?
+  application Application @default(BOTH)
+
+  isFeatured   Boolean @default(false)
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  // Deliberately no price: showroom pricing is quoted, and a stale published
+  // price is a liability. See BACKEND.md §3.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brand    Brand          @relation(fields: [brandId], references: [id])
+  category Category       @relation(fields: [categoryId], references: [id])
+  images   ProductImage[]
+
+  @@index([isActive, displayOrder])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([application])
+  @@index([finish])
+  @@index([isFeatured, isActive])
+}
+
+model ProductImage {
+  id           String   @id @default(cuid())
+  productId    String
+  url          String
+  altText      String?
+  displayOrder Int      @default(0)
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, displayOrder])
+}
+
+model Enquiry {
+  id            String  @id @default(cuid())
+  name          String
+  phone         String
+  email         String?
+  city          String?
+  brandId       String?
+  categoryId    String?
+  /// Non-null per BACKEND.md §3, which marks Enquiry's nullable fields
+  /// exhaustively and does not mark this one. Blank submissions store "".
+  message       String  @default("")
+  attachmentUrl String?
+
+  status        EnquiryStatus @default(NEW)
+  internalNotes String?
+  source        EnquirySource @default(WEBSITE_FORM)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // SetNull, never Cascade: removing a brand must not destroy an enquiry.
+  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([brandId])
+  @@index([categoryId])
+}
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  authorName   String
+  city         String
+  quote        String
+  /// 1-5. Enforced in Zod at every write boundary and by a check constraint.
+  rating       Int      @default(5)
+  source       String   @default("Google Review")
+  isPublished  Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
+
+model Faq {
+  id           String   @id @default(cuid())
+  question     String
+  answer       String
+  displayOrder Int      @default(0)
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isPublished, displayOrder])
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  url          String
+  caption      String?
+  /// Required: every image on this site needs real alt text (PROMPT.md §8).
+  altText      String
+  categoryId   String?
+  displayOrder Int      @default(0)
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, displayOrder])
+  @@index([categoryId])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(STAFF)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
