@@ -5,7 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { FloatingSupport } from '@/components/layout/FloatingSupport';
 import { site } from '@/lib/data/site';
 import { getCategories } from '@/lib/queries/catalogue';
-import './globals.css';
+import '@/app/globals.css';
 
 const manrope = Manrope({
   subsets: ['latin'],
