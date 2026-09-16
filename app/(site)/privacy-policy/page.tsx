@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/Container';
+import { PageHero } from '@/components/layout/PageHero';
 import { fullAddress, mailtoUrl, site, telUrl } from '@/lib/data/site';
 
 export const metadata: Metadata = {
@@ -10,9 +11,16 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <Container className="max-w-measure pb-section-sm pt-40 lg:pb-section">
-      <h1 className="text-heading">Privacy Policy</h1>
-      <div className="mt-8 space-y-6 text-copy">
+    <>
+      <PageHero
+        eyebrow="Legal"
+        title="Privacy Policy"
+        lede="What we collect when you send an enquiry, what we do with it, and who else ever sees it."
+        crumbs={[{ label: 'Privacy Policy', href: '/privacy-policy' }]}
+      />
+
+      <Container className="max-w-measure py-section-sm lg:py-section">
+        <div className="space-y-6 text-copy">
         <p>
           {site.name} collects only what it needs to answer your enquiry: your
           name, phone number and, if you choose to share them, your email
@@ -42,7 +50,8 @@ export default function PrivacyPolicyPage() {
           </a>{' '}
           or visit us at {fullAddress}.
         </p>
-      </div>
-    </Container>
+        </div>
+      </Container>
+    </>
   );
 }

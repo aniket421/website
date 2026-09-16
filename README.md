@@ -103,8 +103,60 @@ never rewrites an existing admin password.
    against the current schema.
 5. Sign in and change the seeded password immediately.
 
+## The public site
+
+Five routes, each its own page rather than an anchor on one long scroll:
+
+| Route | What it is |
+| --- | --- |
+| `/` | The landing page: hero, credibility band, brand marquee, the 4K showcase, category rail, why-us, showroom film, testimonials, closing call to action. |
+| `/products` | The catalogue. Filters (category, brand, finish, application, search) live in the query string, so a filtered view is a link you can send. |
+| `/products/[slug]` | One range, with the full-resolution viewer and the specs the floor gets asked for. |
+| `/gallery` | The display floor as a masonry, every frame openable full screen. |
+| `/contact` | Address, hours, map, and the three ways to reach the floor. |
+| `/enquiry` | The enquiry form on its own page, with what happens after you send it. |
+
+The header is route-aware and the WhatsApp button is a composer, not a link:
+it writes the first message and hands it to WhatsApp, where the conversation
+actually happens.
+
+### Motion
+
+Every animation moves `transform`, `opacity`, or a custom property feeding one
+of them — nothing on this site animates a property that goes through layout,
+because a reflow cannot fit in the 8.3ms a 120Hz display gives you. The pieces:
+
+- `lib/motion/raf.ts` — one scroll listener and one animation frame for the
+  whole page. Scroll-reactive components subscribe; none registers its own
+  listener, and none reads layout inside the callback.
+- `components/motion/` — `Reveal`, `SplitText`, `CountUp`, `Magnetic`,
+  `TiltCard`, `Parallax`, `ScrollProgress`. Pointer effects measure their box
+  on enter, never on move.
+- The scroll-progress bar uses CSS `animation-timeline: scroll()` where the
+  browser has it, which takes it off the main thread entirely, and falls back
+  to the shared loop where it does not.
+- The whole budget is switched off in one `prefers-reduced-motion` block at the
+  end of `app/globals.css`, and a `<noscript>` rule in the site layout reveals
+  everything for readers without JavaScript.
+
+### Image delivery
+
+Product photography is the argument this site makes, so the viewer serves the
+real file: `lib/images.ts` builds a Cloudinary URL at up to 3840px and
+`q_auto:best`, and `next.config.mjs` carries matching `deviceSizes`. Cards and
+grids do not — they go through `next/image` at the width they are actually
+drawn, with the `sizes` strings collected in `imageSizes`. A 4K file in a
+thumbnail is just a slow first paint.
+
 ## Architecture notes
 
+- **Every public page opens with a dark band** — the hero on `/`, `<PageHero>`
+  everywhere else — carrying `data-dark-band`. The header measures it and rests
+  transparent over it, so a new page under `app/(site)` must use `<PageHero>`
+  or its white nav type will land on a white surface.
+- **Public pages read through `safeQuery`.** A database that is unreachable
+  costs a section, not the page: the query falls back to the copy in `lib/data/`
+  and logs once. It is also what lets `next build` prerender without a database.
 - **Two root shells.** `app/(site)` carries the public header, footer and
   WhatsApp button; `app/(admin)` does not. Metadata routes (`robots.ts`,
   `sitemap.ts`) live at the `app/` root, because they do not resolve reliably

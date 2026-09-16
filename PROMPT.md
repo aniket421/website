@@ -81,12 +81,23 @@ elevated panels (form card, video frame).
 
 Build in this order. Each is its own component in `components/sections/`.
 
-1. **Header** — fixed, transparent over the hero, switches to white with blur and
-   a hairline border after 60px of scroll. Left: wordmark "Elegance" with "BATH
-   DECOR" beneath it. Center: Home, About, Products (hover dropdown with the
-   eight product categories), Brands, Gallery, Contact. Right: phone number with
-   icon, then a dark pill "Get In Touch". Under 860px the nav collapses to a
-   hamburger opening a panel below the bar.
+The site is no longer this page alone: `/products`, `/products/[slug]`,
+`/gallery`, `/contact` and `/enquiry` are real routes. The list below still
+describes the homepage, with a 4K product showcase added after the brand
+marquee and the enquiry form moved off it onto `/enquiry`. See README.md,
+"The public site".
+
+1. **Header** — fixed. Left: wordmark "Elegance" with "BATH DECOR" beneath it.
+   Right: phone number with icon, then a dark pill. Under 860px the nav
+   collapses to a hamburger opening a panel below the bar.
+
+   **Amended.** The nav was originally six in-page anchors — Home, About,
+   Products, Brands, Gallery, Contact — on a single scrolling page. It is now
+   four routes: Home, Products (hover panel of categories, the link itself going
+   to `/products`), Gallery, Contact, with the pill reading "Send Enquiry" and
+   pointing at `/enquiry`. About and Brands became sections of the home page
+   rather than destinations. The header's three background states are described
+   in README.md under "Architecture notes".
 2. **Hero** — full viewport height, background photograph of a marble bathroom
    with a dark gradient scrim (55% top, 30% mid, 60% bottom). Centered content: a
    glass pill badge reading "Premium Multi-Brand Showroom" with a brass dot; h1
@@ -165,12 +176,28 @@ full-width dark "Submit Enquiry" button with a paper-plane icon.
 
 ## 6. Motion budget
 
-One orchestrated moment, not effects everywhere. Permitted: the hero scroll cue
-loop, the brand marquee, hover transitions on cards and buttons, accordion
-open/close, carousel scroll, and a single fade on testimonial change. Not
-permitted: fade-and-slide-up entrances on every section as it scrolls into view,
-parallax, counting-up number animations, or staggered card reveals. Respect
-`prefers-reduced-motion` by disabling all of the above.
+**Superseded.** This section originally asked for "one orchestrated moment, not
+effects everywhere", and named scroll-triggered entrances, parallax, counting-up
+figures and staggered card reveals as *not permitted*. The showroom has since
+asked for a fully animated premium page, and all four are now in the build. The
+original rule is recorded here so nobody re-reads it as current.
+
+The budget that replaces it is about cost, not restraint:
+
+- Animate only `transform`, `opacity`, or a custom property that feeds one of
+  them. Nothing that goes through layout — no width, height, top, left, margin
+  or background-position — because a reflow does not fit in the 8.3ms a 120Hz
+  display allows. One opt-in exception: the entry blur on `<Reveal blur>`.
+- One scroll listener and one animation frame for the page, in
+  `lib/motion/raf.ts`. Components subscribe to it; none adds its own listener,
+  and none reads layout inside the callback.
+- Pointer effects measure their box on `pointerenter`, never on `pointermove`.
+- Per-frame values are written to the DOM from refs, not held in React state.
+- Prefer a CSS scroll-driven animation where the browser has one: it runs off
+  the main thread.
+- Respect `prefers-reduced-motion` by disabling all of it, in the single block
+  at the end of `app/globals.css`. Nothing may carry meaning through motion
+  alone, and a reader without JavaScript must still see every section.
 
 ## 7. Content rules
 

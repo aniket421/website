@@ -173,3 +173,112 @@ export async function getFinishes(): Promise<string[]> {
   });
   return rows.map((row) => row.finish).filter((f): f is string => Boolean(f));
 }
+
+/**
+ * The card shape every listing uses. Derived from the query rather than
+ * written out again, so adding a column to the select cannot leave the
+ * components describing a product that no longer exists.
+ */
+export type ProductListItem = Awaited<ReturnType<typeof getProducts>>['items'][number];
+export type ProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
+export type GalleryImageItem = Awaited<ReturnType<typeof getGalleryImages>>[number];
+export type CategoryItem = Awaited<ReturnType<typeof getCategories>>[number];
+
+/**
+ * The ranges the showroom wants on the front page. Featured first, and only
+ * products that actually have a photograph — the showcase is a full-bleed
+ * image pane, and a placeholder gradient in it would say nothing.
+ */
+export async function getFeaturedProducts(limit = 6): Promise<ProductListItem[]> {
+  const featured = await prisma.product.findMany({
+    where: { isActive: true, isFeatured: true, images: { some: {} } },
+    orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+    take: limit,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      size: true,
+      finish: true,
+      application: true,
+      isFeatured: true,
+      brand: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true } },
+      images: {
+        orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+        take: 1,
+        select: { url: true, altText: true },
+      },
+    },
+  });
+
+  if (featured.length >= limit) return featured;
+
+  // Nothing flagged yet: fall back to the newest photographed stock so the
+  // showcase is never an empty frame on a freshly seeded database.
+  const filler = await prisma.product.findMany({
+    where: {
+      isActive: true,
+      images: { some: {} },
+      id: { notIn: featured.map((product) => product.id) },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit - featured.length,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      size: true,
+      finish: true,
+      application: true,
+      isFeatured: true,
+      brand: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true } },
+      images: {
+        orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+        take: 1,
+        select: { url: true, altText: true },
+      },
+    },
+  });
+
+  return [...featured, ...filler];
+}
+
+/** Slugs of every active product, for generateStaticParams. */
+export async function getProductSlugs(): Promise<string[]> {
+  const rows = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  });
+  return rows.map((row) => row.slug);
+}
+
+/** Four more from the same category, to keep a detail page from dead-ending. */
+export async function getRelatedProducts(
+  categoryId: string,
+  excludeId: string,
+  limit = 4,
+): Promise<ProductListItem[]> {
+  return prisma.product.findMany({
+    where: { isActive: true, categoryId, id: { not: excludeId } },
+    orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
+    take: limit,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      size: true,
+      finish: true,
+      application: true,
+      isFeatured: true,
+      brand: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true } },
+      images: {
+        orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }],
+        take: 1,
+        select: { url: true, altText: true },
+      },
+    },
+  });
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/Container';
+import { PageHero } from '@/components/layout/PageHero';
 import { mailtoUrl, site, telUrl } from '@/lib/data/site';
 
 export const metadata: Metadata = {
@@ -10,9 +11,16 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <Container className="max-w-measure pb-section-sm pt-40 lg:pb-section">
-      <h1 className="text-heading">Terms</h1>
-      <div className="mt-8 space-y-6 text-copy">
+    <>
+      <PageHero
+        eyebrow="Legal"
+        title="Terms"
+        lede="How quotations, orders, delivery and returns work at the showroom."
+        crumbs={[{ label: 'Terms', href: '/terms' }]}
+      />
+
+      <Container className="max-w-measure py-section-sm lg:py-section">
+        <div className="space-y-6 text-copy">
         <p>
           This website describes the ranges carried at the {site.name} showroom.
           It is not a shop: nothing here is an offer to sell, and prices,
@@ -48,7 +56,8 @@ export default function TermsPage() {
           </a>
           .
         </p>
-      </div>
-    </Container>
+        </div>
+      </Container>
+    </>
   );
 }

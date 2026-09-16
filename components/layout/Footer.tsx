@@ -2,13 +2,17 @@ import Link from 'next/link';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { getBrands, getCategories } from '@/lib/queries/catalogue';
+import { safeQuery } from '@/lib/queries/safe';
 import { footerQuickLinks } from '@/lib/data/nav';
 import { fullAddress, mailtoUrl, site, telUrl } from '@/lib/data/site';
 
 const year = new Date().getFullYear();
 
 export async function Footer() {
-  const [brands, categories] = await Promise.all([getBrands(), getCategories()]);
+  const [brands, categories] = await Promise.all([
+    safeQuery('footerBrands', () => getBrands(), []),
+    safeQuery('footerCategories', () => getCategories(), []),
+  ]);
 
   return (
     <footer className="on-dark bg-footer text-surface/70">
@@ -58,9 +62,9 @@ export async function Footer() {
             ))}
           </FooterColumn>
 
-          <FooterColumn title="Products">
+          <FooterColumn title="Collections">
             {categories.map((category) => (
-              <FooterLink key={category.slug} href={`#${category.slug}`}>
+              <FooterLink key={category.slug} href={`/products?category=${category.slug}`}>
                 {category.name}
               </FooterLink>
             ))}

@@ -50,6 +50,16 @@ const nextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
+    /*
+     * Extended past Next's default 3840 ceiling of breakpoints so a 4K panel
+     * viewing the product showcase is served a file that actually fills it.
+     * The two largest entries are only ever requested by `sizes` strings that
+     * ask for them — see lib/images.ts.
+     */
+    deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920, 2560, 3200, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    /* Optimised derivatives are immutable; keep them for a month. */
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       // Cloudinary is the only host we serve images from.
       { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },

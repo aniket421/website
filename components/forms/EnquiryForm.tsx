@@ -19,9 +19,16 @@ import { cn } from '@/lib/utils';
 export function EnquiryForm({
   brands,
   categories,
+  defaults,
 }: {
   brands: Option[];
   categories: Option[];
+  /**
+   * Prefilled values, used when someone arrives from a product page — the
+   * range they were looking at is already in the message and the brand and
+   * category are already chosen.
+   */
+  defaults?: Partial<EnquiryValues>;
 }) {
   const ids = useId();
   const [sent, setSent] = useState(false);
@@ -36,7 +43,7 @@ export function EnquiryForm({
     formState: { errors, isSubmitting },
   } = useForm<EnquiryValues>({
     resolver: zodResolver(enquirySchema),
-    defaultValues: emptyEnquiry,
+    defaultValues: { ...emptyEnquiry, ...defaults },
     mode: 'onTouched',
   });
 
@@ -94,7 +101,10 @@ export function EnquiryForm({
 
   if (sent) {
     return (
-      <div className="rounded-panel border border-line bg-surface p-8 shadow-panel lg:p-10">
+      <div
+        role="status"
+        className="animate-rise-in rounded-panel border border-line bg-surface p-8 shadow-panel lg:p-10"
+      >
         <CheckCircle2 aria-hidden="true" className="h-11 w-11 text-brass" strokeWidth={1.5} />
         <h3 className="mt-5 text-heading">Enquiry received</h3>
         <p className="mt-4 text-copy">
@@ -275,10 +285,13 @@ export function EnquiryForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-7 inline-flex h-[3.25rem] w-full items-center justify-center gap-2.5 rounded-full bg-ink-soft text-copy font-semibold text-surface transition-colors duration-200 hover:bg-ink disabled:cursor-not-allowed disabled:opacity-60"
+        className="group mt-7 inline-flex h-[3.25rem] w-full items-center justify-center gap-2.5 rounded-full bg-ink-soft text-copy font-semibold text-surface transition-colors duration-300 hover:bg-ink disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? 'Sending…' : 'Submit Enquiry'}
-        <Send aria-hidden="true" className="h-[1.125rem] w-[1.125rem]" />
+        <Send
+          aria-hidden="true"
+          className="h-[1.125rem] w-[1.125rem] transition-transform duration-400 ease-spring group-hover:translate-x-1 group-hover:-translate-y-0.5"
+        />
       </button>
 
       <p className="mt-4 text-center text-[0.875rem]">{site.responsePromise}</p>
