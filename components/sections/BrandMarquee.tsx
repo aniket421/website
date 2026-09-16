@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { getBrands } from '@/lib/queries/catalogue';
+import { safeQuery } from '@/lib/queries/safe';
 import { Container } from '@/components/ui/Container';
 
 /**
@@ -8,7 +9,7 @@ import { Container } from '@/components/ui/Container';
  * anywhere on the track pauses it — pure CSS, so this stays a Server Component.
  */
 export async function BrandMarquee() {
-  const brands = await getBrands();
+  const brands = await safeQuery('marqueeBrands', () => getBrands(), []);
   if (brands.length === 0) return null;
 
   return (

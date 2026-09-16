@@ -104,14 +104,43 @@ const config: Config = {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
+        /* The WhatsApp button's halo, and the "open now" dot. */
+        'pulse-ring': {
+          '0%': { transform: 'scale(0.85)', opacity: '0.55' },
+          '70%': { transform: 'scale(1.6)', opacity: '0' },
+          '100%': { transform: 'scale(1.6)', opacity: '0' },
+        },
+        'rise-in': {
+          from: { opacity: '0', transform: 'translate3d(0, 14px, 0) scale(0.97)' },
+          to: { opacity: '1', transform: 'translate3d(0, 0, 0) scale(1)' },
+        },
+        /* Slow drift on the hero photograph, a Ken Burns at walking pace. */
+        'slow-zoom': {
+          from: { transform: 'scale(1) translate3d(0, 0, 0)' },
+          to: { transform: 'scale(1.08) translate3d(0, -1.5%, 0)' },
+        },
       },
       animation: {
         marquee: 'marquee 46s linear infinite',
         'scroll-cue': 'scroll-cue 1.9s ease-in-out infinite',
         'fade-in': 'fade-in 320ms ease-out',
+        'pulse-ring': 'pulse-ring 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite',
+        'rise-in': 'rise-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both',
+        'slow-zoom': 'slow-zoom 22s cubic-bezier(0.22, 0.61, 0.36, 1) infinite alternate',
       },
       transitionTimingFunction: {
         subtle: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+        // The house entrance curve: fast off the mark, a long quiet settle.
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        // A touch of overshoot, for controls answering a pointer.
+        spring: 'cubic-bezier(0.34, 1.32, 0.64, 1)',
+      },
+
+      transitionDuration: {
+        400: '400ms',
+        600: '600ms',
+        800: '800ms',
+        900: '900ms',
       },
     },
   },

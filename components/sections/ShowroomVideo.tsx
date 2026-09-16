@@ -19,7 +19,7 @@ export function ShowroomVideo() {
   };
 
   return (
-    <Section id="gallery" aria-labelledby="showroom-heading">
+    <Section id="showroom" aria-labelledby="showroom-heading">
       <Container>
         <SectionHeading
           id="showroom-heading"

@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { Manrope } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { FloatingSupport } from '@/components/layout/FloatingSupport';
+import { WhatsAppWidget } from '@/components/layout/WhatsAppWidget';
 import { site } from '@/lib/data/site';
 import { getCategories } from '@/lib/queries/catalogue';
+import { safeQuery } from '@/lib/queries/safe';
 import '@/app/globals.css';
 
 const manrope = Manrope({
@@ -31,10 +32,26 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const categories = await getCategories();
+  const categories = await safeQuery('navCategories', () => getCategories(), []);
 
   return (
     <html lang="en-IN" className={manrope.variable}>
+      <head>
+        {/*
+          Scroll reveals start hidden and are shown by JavaScript. Without it
+          nothing would ever be revealed, so this turns the whole mechanism off
+          and every section renders in its final state.
+        */}
+        <noscript>
+          {/* eslint-disable-next-line react/no-danger */}
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                '.reveal,.split-text__word{opacity:1!important;transform:none!important;filter:none!important}',
+            }}
+          />
+        </noscript>
+      </head>
       <body>
         <a
           href="#main"
@@ -45,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Header categories={categories} />
         <main id="main">{children}</main>
         <Footer />
-        <FloatingSupport />
+        <WhatsAppWidget />
       </body>
     </html>
   );

@@ -3,12 +3,12 @@ import { LocalBusinessJsonLd } from '@/components/LocalBusinessJsonLd';
 import { Hero } from '@/components/sections/Hero';
 import { Stats } from '@/components/sections/Stats';
 import { BrandMarquee } from '@/components/sections/BrandMarquee';
-import { ShowroomVideo } from '@/components/sections/ShowroomVideo';
+import { Showcase } from '@/components/sections/Showcase';
 import { CategoryRail } from '@/components/sections/CategoryRail';
 import { WhyChooseUs } from '@/components/sections/WhyChooseUs';
+import { ShowroomVideo } from '@/components/sections/ShowroomVideo';
 import { Testimonials } from '@/components/sections/Testimonials';
-import { Faq } from '@/components/sections/Faq';
-import { Contact } from '@/components/sections/Contact';
+import { CtaBand } from '@/components/sections/CtaBand';
 
 /** Showroom edits appear within five minutes without a redeploy. */
 export const revalidate = 300;
@@ -37,6 +37,12 @@ export const metadata: Metadata = {
   },
 };
 
+/*
+ * The order is the argument the page makes, in sequence: what we are, the
+ * proof, who we stock, what the product actually looks like up close, what you
+ * can browse, why us, the room itself, other people's verdict, and then the
+ * ask. Every section below the hero reveals as it is reached.
+ */
 export default function HomePage() {
   return (
     <>
@@ -44,12 +50,12 @@ export default function HomePage() {
       <Hero />
       <Stats />
       <BrandMarquee />
-      <ShowroomVideo />
+      <Showcase />
       <CategoryRail />
       <WhyChooseUs />
+      <ShowroomVideo />
       <Testimonials />
-      <Faq />
-      <Contact />
+      <CtaBand />
     </>
   );
 }
